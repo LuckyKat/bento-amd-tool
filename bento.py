@@ -20,12 +20,15 @@ def plugin_loaded():
     init_plugin()
 
 class BentoAmdCommand(sublime_plugin.TextCommand):
-    
-    def on_done(self, index): 
+
+    def on_done(self, index):
+        if index == -1:
+            return
+
         file = self.files[index]
         print(file)
         # TODO: open this file and find the real module name + alias
-        # TODO: edit current file and insert name + alias 
+        # TODO: edit current file and insert name + alias
         return
 
     def run(self, edit):
@@ -38,10 +41,17 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
         self.files = []
         # quick panel needs a list of string lists
         self.qpanel = []
+        #find root folder of current file
+        current = window.active_view().file_name()
         # enumerate js folders
         for folder in folders:
             path = os.path.join(folder, "js")
             if os.path.isdir(path):
+                #unsure wether this will work on windows too
+                root = folder.split('/').pop()
+                if (current.count(folder) == 0 and root != 'Bento'):
+                    continue
+
                 for (dirpath, dirnames, filenames) in walk(path):
                     f = []
                     n = []
@@ -52,8 +62,8 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
                         name = filepath[(len(path) + 1):]
                         name = name[:-3] #cut off .js
 
-                        # TODO: ignore folders outside the active file
-                        # TODO: exception for bento folder and prepend bento/
+                        if (root == 'Bento'):
+                            name = 'bento/'+name;
 
                         f.append(filepath)
                         n.append(name)
@@ -62,8 +72,8 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
                         q.append(filepath)
                         # add to quick panel
                         self.qpanel.append(q)
-                        
-                    # append the paths and names 
+
+                    # append the paths and names
                     self.files.extend(f)
                     self.names.extend(n)
 
