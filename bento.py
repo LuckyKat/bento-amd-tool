@@ -24,8 +24,8 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
     def on_done(self, index):
         if index == -1:
             return
-
-        file = open(self.files[index]).read()
+        print(self.files[index])
+        file = open(self.files[index], 'rb').read().decode('utf-8')
         a = file.find('bento.define(\'')+14
         b = file.find('\'',a)
 
@@ -133,4 +133,3 @@ class BentoInsertCommand(sublime_plugin.TextCommand):
         while ii > 0:
             ii -= 1
             self.view.insert(edit, args['pos'][ii], args['content'][ii])
-
