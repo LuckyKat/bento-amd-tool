@@ -1,6 +1,12 @@
-[{
+[
+	{
 		"id": "bento_amd",
 		"command": "bento_amd",
 		"caption": "Bento AMD"
+	},
+	{
+		"id": "bento_definition",
+		"command": "bento_definition",
+		"caption": "Bento definition"
 	}
 ]

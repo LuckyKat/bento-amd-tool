@@ -2,5 +2,9 @@
     {
         "caption": "Bento AMD",
         "command": "bento_amd"
+    },
+     {
+        "caption": "Bento definition",
+        "command": "bento_definition"
     }
 ]

@@ -1,4 +1,5 @@
 import sublime, sublime_plugin
+import re
 import os
 from os import walk
 from os import listdir
@@ -31,19 +32,16 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
 
         modulePath = file[a:b]
 
-        #TODO: find actual alias defined in file...
         moduleName = self.names[index].split('/').pop()
         moduleName = moduleName.capitalize()
 
-        a = file.find('@moduleName')
+        #Try to find actual alias defined in file
+        a = file.find('@moduleName ')
         if (a != -1):
             a += 12
             b = file.find('\n', a)
             moduleName = file[a:b]
 
-
-        print(modulePath, moduleName)
-        # TODO: edit current file and insert name + alias
         view = sublime.active_window().active_view()
         regions = view.find_by_selector('meta.function.anonymous.js') + view.find_by_selector('punctuation.definition.brackets.js')
 
@@ -106,10 +104,14 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
                         q = []
                         filepath = os.path.join(dirpath, filename) #get full path
                         name = filepath[(len(path) + 1):]
+                        if(name[-3:] != '.js'):
+                            continue
+
                         name = name[:-3] #cut off .js
 
                         if (root == 'Bento'):
                             name = 'bento/'+name;
+
 
                         f.append(filepath)
                         n.append(name)
@@ -127,9 +129,86 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
         window.show_quick_panel(self.qpanel, self.on_done)
 
 
+
+
 class BentoInsertCommand(sublime_plugin.TextCommand):
     def run(self, edit, args):
         ii = len(args['pos'])
         while ii > 0:
             ii -= 1
             self.view.insert(edit, args['pos'][ii], args['content'][ii])
+
+
+
+
+class BentoDefinitionCommand(sublime_plugin.TextCommand):
+    def run(self, edit, event):
+        #TODO open file at path in new windo
+        word = self.view.substr(self.view.word(self.view.window_to_text([event['x'],event['y']])))
+
+        #get index in modules list
+        modules = self.view.substr(self.view.find_by_selector('meta.function.anonymous.js')[0])
+        modules = modules.split('\n')
+        modules.pop()
+        del modules[0]
+        modules = "".join(modules)
+        modules = re.sub('[\t\s]', '', modules).split(',')
+
+        if (modules.count(word) == 0):
+            print('not a module')
+            return
+
+        moduleIndex = modules.index(word)
+
+        #find matching path
+        brackets = self.view.find_by_selector('punctuation.definition.brackets.js')
+        paths = sublime.Region(brackets[0].a, brackets[1].b)
+        paths = self.view.substr(paths)
+        paths = paths.split('\n')
+        paths.pop();
+        del paths[0]
+        paths = "".join(paths)
+        paths = re.sub('[\'\t\s]','',paths).split(',')
+
+        path = paths[moduleIndex]
+
+        currentFolder = ''
+        bentoFolder = ''
+        currentFile = sublime.active_window().active_view().file_name()
+
+        #find root folders
+        for folder in sublime.active_window().folders():
+            p = os.path.join(folder, "js")
+            if (folder.split('/')[-1] == 'Bento'):
+                bentoFolder = path
+            if os.path.isdir(p):
+                if(currentFile.count(p) != 0):
+                    currentFolder = p
+                    if(bentoFolder == ''):
+                        bentoFolder = folder.split('/')
+                        bentoFolder.pop()
+                        bentoFolder = "/".join(bentoFolder)
+                        bentoFolder = os.path.join(bentoFolder, "Bento/js")
+
+
+        fullPath = ''
+        if (path.split('/')[0] == 'bento'):
+            fullPath = bentoFolder
+            path = re.sub('bento/','',path)
+        else:
+            fullPath = currentFolder
+
+        if (path == 'bento'):
+            fullPath += '/bento.js'
+        else:
+            fullPath += '/'+path+'.js'
+
+        print(fullPath)
+
+        sublime.active_window().open_file(fullPath)
+
+        return
+
+    def want_event(self):
+        return True
+
