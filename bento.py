@@ -25,10 +25,48 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
         if index == -1:
             return
 
-        file = self.files[index]
-        print(file)
-        # TODO: open this file and find the real module name + alias
+        file = open(self.files[index]).read()
+        a = file.find('bento.define(\'')+14
+        b = file.find('\'',a)
+
+        modulePath = file[a:b]
+
+        #TODO: find actual alias defined in file...
+        moduleName = self.names[index].split('/').pop()
+        moduleName = moduleName.capitalize()
+
+        print(modulePath, moduleName)
         # TODO: edit current file and insert name + alias
+        view = sublime.active_window().active_view()
+        regions = view.find_by_selector('meta.function.anonymous.js') + view.find_by_selector('punctuation.definition.brackets.js')
+
+        modulePath = "\t\'"+modulePath+"\'"
+        moduleName = "\t"+moduleName
+
+        pathPos = -1
+        namePos = -1
+
+        arrayStart = -1;
+
+        for region in regions:
+            char = view.substr(region)[-1]
+            if (char == '['):
+                arrayStart = region.a
+            if (char == ']' and pathPos == -1):
+                l = region.b - arrayStart
+                #TODO this isn't exactly foolproof
+                if (l > 10):
+                    modulePath = ",\n"+modulePath
+                pathPos = region.b - 2
+
+            if (char == ')' and namePos == -1):
+                #TODO this isn't exactly foolproof
+                if (region.b - region.a > 17):
+                    moduleName = ",\n"+moduleName
+                namePos = region.b - 2
+
+        view.run_command("bento_insert", {"args":{"content": [modulePath, moduleName], "pos" : [pathPos, namePos]}})
+
         return
 
     def run(self, edit):
@@ -79,4 +117,12 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
 
         # show quick panel
         window.show_quick_panel(self.qpanel, self.on_done)
+
+
+class BentoInsertCommand(sublime_plugin.TextCommand):
+    def run(self, edit, args):
+        ii = len(args['pos'])
+        while ii > 0:
+            ii -= 1
+            self.view.insert(edit, args['pos'][ii], args['content'][ii])
 
