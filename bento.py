@@ -35,6 +35,13 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
         moduleName = self.names[index].split('/').pop()
         moduleName = moduleName.capitalize()
 
+        a = file.find('@moduleName')
+        if (a != -1):
+            a += 12
+            b = file.find('\n', a)
+            moduleName = file[a:b]
+
+
         print(modulePath, moduleName)
         # TODO: edit current file and insert name + alias
         view = sublime.active_window().active_view()
@@ -65,6 +72,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
                     moduleName = ",\n"+moduleName
                 namePos = region.b - 2
 
+        #the inserts get combined into one command, so a single cmd+z undoes them
         view.run_command("bento_insert", {"args":{"content": [modulePath, moduleName], "pos" : [pathPos, namePos]}})
 
         return
