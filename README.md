@@ -1,3 +1,3 @@
 # Bento AMD Tool
 
-Not finished yet
+Tool for inserting dependencies in bento.require
