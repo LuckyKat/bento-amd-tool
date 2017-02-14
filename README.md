@@ -1,3 +1,3 @@
 # Bento AMD Tool
 
-Tool for inserting dependencies in bento.require
+Sublime Text plugin for inserting dependencies in bento.require
