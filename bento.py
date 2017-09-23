@@ -97,10 +97,9 @@ def findSnippets(view):
     for path in paths:
         # read the file and find 
         fullPath = getFullPath(path)
-        fullPath = re.sub(fullPath, '')
 
         # already cached?
-        # TODO unless the tab is open
+        # unless the tab is open
         if (fullPath in completions and fullPath not in sheets):
             continue
         if (fullPath):
@@ -113,7 +112,7 @@ def findSnippets(view):
 # open file and search for snippet
 def inspectFile(path):
     # read file
-    file = open(path, 'rb').read().decode('utf-8')
+    file = open(path, 'r').read()
     # find the line with @snippet
     isSearching = True
     searchPos = 0
@@ -154,7 +153,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
         if index == -1:
             return
         print(self.files[index])
-        file = open(self.files[index], 'rb').read().decode('utf-8')
+        file = open(self.files[index], 'r').read().
         a = file.find('bento.define(\'')+14
         b = file.find('\'',a)
 
