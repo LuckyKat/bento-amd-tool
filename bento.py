@@ -92,15 +92,16 @@ def findSnippets(view):
     sheets = sublime.active_window().sheets()
     fileNames = []
     for sheet in sheets:
-        fileNames.append(sheet.view().file_name())
+        fileNames.append(os.path.abspath(sheet.view().file_name()))
 
     for path in paths:
         # read the file and find 
         fullPath = getFullPath(path)
+        fullPath = os.path.abspath(fullPath)
 
         # already cached?
         # unless the tab is open
-        if (fullPath in completions and fullPath not in sheets):
+        if (fullPath in completions and fullPath not in fileNames):
             continue
         if (fullPath):
             # open file and inspect
@@ -133,7 +134,7 @@ def inspectFile(path):
 
         # strip whitespaces
         snippetName = snippetName.strip()
-        snippet = snippet.lstrip()
+        snippet = snippet.strip()
         snippets.append([snippetName, snippet])
         
         # prepare for searching next snippet
@@ -153,7 +154,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
         if index == -1:
             return
         print(self.files[index])
-        file = open(self.files[index], 'r').read().
+        file = open(self.files[index], 'r').read()
         a = file.find('bento.define(\'')+14
         b = file.find('\'',a)
 
