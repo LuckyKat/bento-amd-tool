@@ -6,6 +6,7 @@ from os import listdir
 from os.path import isfile, join
 
 settings = {}
+completions = {}
 
 def init_plugin():
     global settings
@@ -20,6 +21,133 @@ def init_plugin():
 def plugin_loaded():
     init_plugin()
 
+# try to get full path of existing js file of a module path
+def getFullPath(path):
+    currentFolder = ''
+    bentoFolder = ''
+    currentFile = sublime.active_window().active_view().file_name()
+
+    #find root folders
+    for folder in sublime.active_window().folders():
+        p = os.path.join(folder, "js")
+        if (folder.split(os.sep)[-1].lower() == "bento"):
+            bentoFolder = os.path.join(folder, "js")
+        if os.path.isdir(p):
+            if(currentFile.count(p) != 0):
+                currentFolder = p
+                if(bentoFolder == ''):
+                    bentoFolder = folder.split(os.sep)
+                    bentoFolder.pop()
+                    bentoFolder = os.sep.join(bentoFolder)
+                    bentoFolder = os.path.join(bentoFolder, "Bento" + os.sep +"js")
+
+
+    fullPath = ''
+    if (path.split('/')[0] == 'bento'):
+        fullPath = bentoFolder
+        path = re.sub('bento/','',path)
+    else:
+        fullPath = currentFolder
+
+    if (path == 'bento'):
+        fullPath += '/bento.js'
+    else:
+        fullPath += '/'+path+'.js'
+    
+    if (os.path.isfile(fullPath) == False):
+        # file doesn't exist, try js/modules
+        fullPath = fullPath.replace('js/' ,'js/modules/')
+        if (os.path.isfile(fullPath)):
+            return fullPath
+        else:
+            return ''
+    else:
+        return fullPath
+
+# event listener when st presents completions
+class CompletionListener(sublime_plugin.EventListener):
+    def on_query_completions(self, view, prefix, locations):
+        print("on_query_completions")
+        out = []
+        for key in completions:
+            snippets = completions[key]
+            for snippet in snippets:
+                out.append(snippet)
+        print(completions)
+        return out
+
+# ready paths and find snippets from files
+def findSnippets(view):
+    # read dependencies and add completions
+    global completions
+    brackets = view.find_by_selector('punctuation.definition.brackets.js') + view.find_by_selector('meta.brackets.js')
+    paths = sublime.Region(brackets[0].a, brackets[0].b)
+    paths = view.substr(paths)
+    paths = paths.split('\n')
+    paths.pop();
+    del paths[0]
+    paths = "".join(paths)
+    paths = re.sub('[\'\t\s]','',paths).split(',')
+
+    sheets = sublime.active_window().sheets()
+    fileNames = []
+    for sheet in sheets:
+        fileNames.append(sheet.view().file_name())
+
+    for path in paths:
+        # read the file and find 
+        fullPath = getFullPath(path)
+        fullPath = re.sub(fullPath, '')
+
+        # already cached?
+        # TODO unless the tab is open
+        if (fullPath in completions and fullPath not in sheets):
+            continue
+        if (fullPath):
+            # open file and inspect
+            # even if the file has no snippet, we cache the result so it doesnt have to be opened again
+            snippets = inspectFile(fullPath)
+            # cache result
+            completions[fullPath] = snippets
+
+# open file and search for snippet
+def inspectFile(path):
+    # read file
+    file = open(path, 'rb').read().decode('utf-8')
+    # find the line with @snippet
+    isSearching = True
+    searchPos = 0
+    snippets = []
+    while True:
+        snippetPos = file.find('@snippet', searchPos)
+        if (snippetPos < 0):
+            # no snippets found
+            break
+
+        # skip the word snippet itself
+        snippetPos += 9
+        snippetNamePos = file.find('\n', snippetPos)
+        endPos = file.find(' *', snippetNamePos)
+
+        snippetName = file[snippetPos: snippetNamePos];
+        snippet = file[snippetNamePos: endPos];
+
+        # strip whitespaces
+        snippetName = snippetName.strip()
+        snippet = snippet.lstrip()
+        snippets.append([snippetName, snippet])
+        
+        # prepare for searching next snippet
+        searchPos = endPos
+
+    return snippets
+
+# event listener when st opens a file
+class OpenListener(sublime_plugin.EventListener):
+    def on_load_async(self, view):
+        findSnippets(view)
+        return 
+    
 class BentoAmdCommand(sublime_plugin.TextCommand):
 
     def on_done(self, index):
@@ -72,6 +200,9 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
 
         #the inserts get combined into one command, so a single cmd+z undoes them
         view.run_command("bento_insert", {"args":{"content": [modulePath, moduleName], "pos" : [pathPos, namePos]}})
+
+        # refresh snippets
+        findSnippets(view)
 
         return
 
@@ -162,7 +293,7 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
 
         #find matching path
         brackets = self.view.find_by_selector('punctuation.definition.brackets.js') + self.view.find_by_selector('meta.brackets.js')
-        paths = sublime.Region(brackets[0].a, brackets[1].b)
+        paths = sublime.Region(brackets[0].a, brackets[0].b)
         paths = self.view.substr(paths)
         paths = paths.split('\n')
         paths.pop();
@@ -171,9 +302,6 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
         paths = re.sub('[\'\t\s]','',paths).split(',')
 
         path = paths[moduleIndex]
-
-        # quick fix: remove trailing ] if needed
-        path = path.replace("]", "")
 
         currentFolder = ''
         bentoFolder = ''
