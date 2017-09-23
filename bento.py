@@ -43,7 +43,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
             moduleName = file[a:b]
 
         view = sublime.active_window().active_view()
-        regions = view.find_by_selector('meta.function.anonymous.js') + view.find_by_selector('punctuation.definition.brackets.js')
+        regions = view.find_by_selector('meta.function.anonymous.js') + view.find_by_selector('punctuation.definition.brackets.js') + view.find_by_selector('meta.brackets.js')
 
         modulePath = "\t\'"+modulePath+"\'"
         moduleName = "\t"+moduleName
@@ -161,7 +161,7 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
         moduleIndex = modules.index(word)
 
         #find matching path
-        brackets = self.view.find_by_selector('punctuation.definition.brackets.js')
+        brackets = self.view.find_by_selector('punctuation.definition.brackets.js') + self.view.find_by_selector('meta.brackets.js')
         paths = sublime.Region(brackets[0].a, brackets[1].b)
         paths = self.view.substr(paths)
         paths = paths.split('\n')
@@ -172,6 +172,9 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
 
         path = paths[moduleIndex]
 
+        # quick fix: remove trailing ] if needed
+        path = path.replace("]", "")
+
         currentFolder = ''
         bentoFolder = ''
         currentFile = sublime.active_window().active_view().file_name()
@@ -179,16 +182,16 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
         #find root folders
         for folder in sublime.active_window().folders():
             p = os.path.join(folder, "js")
-            if (folder.split('/')[-1] == 'Bento'):
-                bentoFolder = path
+            if (folder.split(os.sep)[-1].lower() == "bento"):
+                bentoFolder = os.path.join(folder, "js")
             if os.path.isdir(p):
                 if(currentFile.count(p) != 0):
                     currentFolder = p
                     if(bentoFolder == ''):
-                        bentoFolder = folder.split('/')
+                        bentoFolder = folder.split(os.sep)
                         bentoFolder.pop()
-                        bentoFolder = "/".join(bentoFolder)
-                        bentoFolder = os.path.join(bentoFolder, "Bento/js")
+                        bentoFolder = os.sep.join(bentoFolder)
+                        bentoFolder = os.path.join(bentoFolder, "Bento" + os.sep +"js")
 
 
         fullPath = ''
@@ -202,10 +205,13 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
             fullPath += '/bento.js'
         else:
             fullPath += '/'+path+'.js'
-
-        print(fullPath)
-
-        sublime.active_window().open_file(fullPath)
+        
+        if (os.path.isfile(fullPath) == False):
+            # file doesn't exist, try js/modules
+            fullPath = fullPath.replace('js/' ,'js/modules/')
+            sublime.active_window().open_file(fullPath)
+        else:
+            sublime.active_window().open_file(fullPath)
 
         return
 
