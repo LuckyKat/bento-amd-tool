@@ -71,6 +71,7 @@ class CompletionListener(sublime_plugin.EventListener):
         for key in completions:
             snippets = completions[key]
             for snippet in snippets:
+                # TODO: only show snippet if it's available in module list 
                 out.append(snippet)
         return out
 
@@ -145,6 +146,13 @@ class OpenListener(sublime_plugin.EventListener):
     def on_load_async(self, view):
         findSnippets(view)
         return 
+    # update snippet on saving
+    def on_post_save_async(self, view):
+        snippets = inspectFile(view.file_name())
+        print(snippets)
+        # update snippet 
+        completions[fullPath] = snippets
+        return
     
 class BentoAmdCommand(sublime_plugin.TextCommand):
 
