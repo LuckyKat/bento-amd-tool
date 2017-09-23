@@ -67,13 +67,11 @@ def getFullPath(path):
 # event listener when st presents completions
 class CompletionListener(sublime_plugin.EventListener):
     def on_query_completions(self, view, prefix, locations):
-        print("on_query_completions")
         out = []
         for key in completions:
             snippets = completions[key]
             for snippet in snippets:
                 out.append(snippet)
-        print(completions)
         return out
 
 # ready paths and find snippets from files
