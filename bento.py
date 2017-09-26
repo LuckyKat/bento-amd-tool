@@ -67,6 +67,9 @@ def getFullPath(path):
 # event listener when st presents completions
 class CompletionListener(sublime_plugin.EventListener):
     def on_query_completions(self, view, prefix, locations):
+        syntax = view.settings().get('syntax');
+        if (not "JavaScript" in syntax):
+            return None
         out = []
         for key in completions:
             snippets = completions[key]
@@ -78,7 +81,7 @@ class CompletionListener(sublime_plugin.EventListener):
 def findSnippets(view):
     # read dependencies and add completions
     global completions
-    brackets = view.find_by_selector('punctuation.definition.brackets.js') + view.find_by_selector('meta.brackets.js')
+    brackets = view.find_by_selector('meta.brackets.js')
     paths = sublime.Region(brackets[0].a, brackets[0].b)
     paths = view.substr(paths)
     paths = paths.split('\n')
@@ -130,6 +133,10 @@ def inspectFile(path):
         snippetName = file[snippetPos: snippetNamePos];
         snippet = file[snippetNamePos: endPos];
 
+        # replace dots with tabs
+        # Bug in sublime???
+        snippetName = snippetName.replace(".", "\t")
+
         # strip whitespaces
         snippetName = snippetName.strip()
         snippet = snippet.strip()
@@ -143,10 +150,16 @@ def inspectFile(path):
 # event listener when st opens a file
 class OpenListener(sublime_plugin.EventListener):
     def on_load_async(self, view):
+        syntax = view.settings().get('syntax');
+        if (not "JavaScript" in syntax):
+            return None
         findSnippets(view)
         return 
     # update snippet on saving
     def on_post_save_async(self, view):
+        syntax = view.settings().get('syntax');
+        if (not "JavaScript" in syntax):
+            return None
         fullPath = os.path.abspath(view.file_name())
         snippets = inspectFile(fullPath)
         print(snippets)
@@ -298,7 +311,7 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
         moduleIndex = modules.index(word)
 
         #find matching path
-        brackets = self.view.find_by_selector('punctuation.definition.brackets.js') + self.view.find_by_selector('meta.brackets.js')
+        brackets = self.view.find_by_selector('meta.brackets.js')
         paths = sublime.Region(brackets[0].a, brackets[0].b)
         paths = self.view.substr(paths)
         paths = paths.split('\n')
