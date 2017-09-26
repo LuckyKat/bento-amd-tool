@@ -94,7 +94,10 @@ def findSnippets(view):
     sheets = sublime.active_window().sheets()
     fileNames = []
     for sheet in sheets:
-        fileNames.append(os.path.abspath(sheet.view().file_name()))
+        fileName = sheet.view().file_name()
+        if (not fileName):
+            continue
+        fileNames.append(os.path.abspath(fileName))
 
     for path in paths:
         # read the file and find 
@@ -159,7 +162,13 @@ class OpenListener(sublime_plugin.EventListener):
             return None
         findSnippets(view)
         return 
-    # update snippet on saving
+    def on_activated_async(self, view):
+        syntax = view.settings().get('syntax');
+        if (not "JavaScript" in syntax):
+            return None
+        findSnippets(view)
+        return 
+    # update own snippet on saving
     def on_post_save_async(self, view):
         syntax = view.settings().get('syntax');
         if (not "JavaScript" in syntax):
@@ -174,6 +183,7 @@ class OpenListener(sublime_plugin.EventListener):
 class BentoAmdCommand(sublime_plugin.TextCommand):
 
     def on_done(self, index):
+        view = sublime.active_window().active_view()
         syntax = view.settings().get('syntax');
         if (not "JavaScript" in syntax):
             return None
@@ -200,7 +210,6 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
             b = file.find('\n', a)
             moduleName = file[a:b]
 
-        view = sublime.active_window().active_view()
         regions = view.find_by_selector('meta.function.anonymous.js') + view.find_by_selector('punctuation.definition.brackets.js') + view.find_by_selector('meta.brackets.js')
 
         modulePath = "\t\'"+modulePath+"\'"
