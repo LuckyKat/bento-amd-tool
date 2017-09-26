@@ -4,6 +4,7 @@ import os
 from os import walk
 from os import listdir
 from os.path import isfile, join
+import io
 
 settings = {}
 completions = {}
@@ -114,7 +115,10 @@ def findSnippets(view):
 # open file and search for snippet
 def inspectFile(path):
     # read file
-    file = open(path, 'r').read()
+    # file = open(path, 'r').read()
+    with io.open(path, "r", encoding="utf-8") as my_file:
+        file = my_file.read() 
+
     # find the line with @snippet
     isSearching = True
     searchPos = 0
@@ -170,10 +174,17 @@ class OpenListener(sublime_plugin.EventListener):
 class BentoAmdCommand(sublime_plugin.TextCommand):
 
     def on_done(self, index):
+        syntax = view.settings().get('syntax');
+        if (not "JavaScript" in syntax):
+            return None
+
         if index == -1:
             return
         print(self.files[index])
-        file = open(self.files[index], 'r').read()
+        # file = open(self.files[index], 'r').read()
+        with io.open(self.files[index], "r", encoding="utf-8") as my_file:
+            file = my_file.read() 
+
         a = file.find('bento.define(\'')+14
         b = file.find('\'',a)
 
