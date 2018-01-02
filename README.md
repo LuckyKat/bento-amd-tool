@@ -4,7 +4,7 @@ Sublime Text plugin for helping with dependencies in Bento. Bento works with a R
 
 ## How to install
 
-No package control support. Install this plugin manually! Download this repository and place it in the Sublime Text's Packages folder
+No package control support. Install this plugin manually! Download this repository and place the folder in the Sublime Text's Packages folder. Rename the folder to `BentoAMD`.
 
 You must also add `"auto_complete_triggers": [{"selector": "source.js", "characters": "."}]` to your sublime settings to enable the trigger for completions.
 
