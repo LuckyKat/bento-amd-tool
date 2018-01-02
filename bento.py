@@ -19,6 +19,10 @@ def init_plugin():
     settings.clear_on_change('reload')
     settings.add_on_change('reload', init_plugin)
 
+    # user must add this setting!
+    # "auto_complete_triggers": [{"selector": "source.js", "characters": "."}]
+
+
 def plugin_loaded():
     init_plugin()
 
@@ -72,10 +76,58 @@ class CompletionListener(sublime_plugin.EventListener):
         if (not "JavaScript" in syntax):
             return None
         out = []
-        for key in completions:
-            snippets = completions[key]
-            for snippet in snippets:
-                out.append(snippet)
+
+        # get last letter
+        region = view.sel()[0];
+        region.a = region.a - 1;
+        lastLetter = view.substr(region)
+        lastWord = ''
+        definedWord = ''
+
+        lastLine = view.substr(view.line(region))
+        lastWord = lastLine.strip();
+
+        if lastLetter == '.':
+            # remove dot
+            lastWord = lastWord[:-1]
+
+            # try to find the definition of this
+            body = view.substr(sublime.Region(0, view.size()))
+            definition = lastWord + ' = new '
+            defIndex = body.find(definition);
+            if defIndex >= 0:
+                # get the constructor word
+                defLine = view.substr(view.line(defIndex))
+                defWord = defLine.split(' = new ')[1].split('(')[0]
+                definedWord = defWord
+        else:
+            # find the string after the last whitespace
+            lastWord = lastWord.rsplit(' ', 1)[-1]
+
+        if (lastLetter != '.'):
+            for key in completions:
+                snippets = completions[key]
+                for snippet in snippets:
+                    # ignore the snippets that start with #
+                    leftWord = snippet[0]
+                    if (leftWord.startswith('#')):
+                        continue
+                    # the word typed so far must be an exact match so far
+                    if (lastWord.startswith(leftWord[0:len(lastWord)])):
+                        out.append(snippet)
+        else:
+            # dot completion
+            for key in completions:
+                snippets = completions[key]
+                for snippet in snippets:
+                    leftWord = snippet[0].split('\t')[0]
+                    # return the snippets that match exactly left of the .
+                    if (leftWord.startswith(lastWord)):
+                        out.append(snippet)
+                    # match objects
+                    if (definedWord != '' and leftWord.startswith('#' + definedWord)):
+                        sn0 = snippet[0].replace('#' + definedWord + '.', '')
+                        out.append([sn0, snippet[1]])
         return out
 
 # ready paths and find snippets from files
@@ -142,7 +194,7 @@ def inspectFile(path):
 
         # replace dots with tabs
         # Bug in sublime???
-        snippetName = snippetName.replace(".", "\t")
+        snippetName = snippetName.replace("|", "\t")
 
         # strip whitespaces
         snippetName = snippetName.strip()
@@ -175,7 +227,7 @@ class OpenListener(sublime_plugin.EventListener):
             return None
         fullPath = os.path.abspath(view.file_name())
         snippets = inspectFile(fullPath)
-        print(snippets)
+        # print(snippets)
         # update snippet 
         completions[fullPath] = snippets
         return
