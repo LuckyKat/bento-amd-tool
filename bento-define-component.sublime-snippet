@@ -1,0 +1,48 @@
+<snippet>
+    <content><![CDATA[
+/**
+ * ${1:Component description}
+ * @moduleName ${2:ModuleName}
+ * @snippet ${2:ModuleName}.snippet
+${2:ModuleName}({
+    
+})
+ */
+bento.define('${3}', [
+    'bento',
+    'bento/math/vector2',
+    'bento/math/rectangle',
+    'bento/entity',
+    'bento/eventsystem',
+    'bento/utils',
+    'bento/tween'
+], function (
+    Bento,
+    Vector2,
+    Rectangle,
+    Entity,
+    EventSystem,
+    Utils,
+    Tween
+) {
+    'use strict';
+    return function (settings) {
+        var viewport = Bento.getViewport();
+        var entity;
+        var component = {
+            name: '${4}',
+            start: function (data) {},
+            destroy: function (data) {},
+            update: function (data) {},
+            draw: function (data) {},
+            attached: function (data) {
+                entity = data.entity;
+            }
+        };
+        return component;
+    };
+});
+]]></content>
+    <tabTrigger>bento</tabTrigger>
+    <description>Bento Component Module</description>
+</snippet>

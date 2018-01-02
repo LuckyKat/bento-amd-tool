@@ -1,0 +1,81 @@
+<snippet>
+    <!-- A standard bento define snippet with sprite and entity to fill in -->
+    <content><![CDATA[
+/**
+ * ${1:Module description}
+ * @moduleName ${2:ModuleName}
+ * @snippet ${2:ModuleName}.snippet
+${2:ModuleName}({
+    position: new Vector2(0, 0)
+})
+ */
+bento.define('${3}', [
+    'bento',
+    'bento/math/vector2',
+    'bento/math/rectangle',
+    'bento/components/sprite',
+    'bento/components/clickable',
+    'bento/entity',
+    'bento/eventsystem',
+    'bento/gui/clickbutton',
+    'bento/gui/counter',
+    'bento/gui/text',
+    'bento/utils',
+    'bento/tween'
+], function (
+    Bento,
+    Vector2,
+    Rectangle,
+    Sprite,
+    Clickable,
+    Entity,
+    EventSystem,
+    ClickButton,
+    Counter,
+    Text,
+    Utils,
+    Tween
+) {
+    'use strict';
+    return function (settings) {
+        var viewport = Bento.getViewport();
+        var position = settings.position;
+        var sprite = new Sprite({
+            imageName: '${4}',
+            frameCountX: 1,
+            frameCountY: 1,
+            originRelative: new Vector2(0, 0),
+            animations: {
+                default: {
+                    speed: 0,
+                    frames: [0]
+                }
+            }
+        });
+        var behavior = {
+            name: '${5:behaviorComponent}',
+            start: function (data) {},
+            destroy: function (data) {},
+            update: function (data) {},
+            draw: function (data) {}
+        };
+        var entity = new Entity({
+            z: 0,
+            name: '${6}',
+            family: [''],
+            position: position,
+            updateWhenPaused: 0,
+            float: false,
+            components: [
+                sprite,
+                behavior
+            ]
+        });
+        return entity;
+    };
+});
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>bento</tabTrigger>
+    <description>Bento Entity Definition</description>
+</snippet>

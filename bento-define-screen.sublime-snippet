@@ -1,0 +1,50 @@
+<snippet>
+    <!-- A standard bento screen define snippet -->
+    <content><![CDATA[
+/**
+ * ${1:Screen description}
+ */
+bento.define('${2}', [
+    'bento',
+    'bento/math/vector2',
+    'bento/math/rectangle',
+    'bento/components/sprite',
+    'bento/components/clickable',
+    'bento/entity',
+    'bento/eventsystem',
+    'bento/gui/clickbutton',
+    'bento/gui/counter',
+    'bento/gui/text',
+    'bento/utils',
+    'bento/screen',
+    'bento/tween'
+], function (
+    Bento,
+    Vector2,
+    Rectangle,
+    Sprite,
+    Clickable,
+    Entity,
+    EventSystem,
+    ClickButton,
+    Counter,
+    Text,
+    Utils,
+    Screen,
+    Tween
+) {
+    'use strict';
+    var onShow = function (settings) {
+        ${3:/* Screen starts here */}
+    };
+
+    return new Screen({
+        onShow: onShow
+    });
+});
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>bento</tabTrigger>
+    <description>Bento Screen Definition</description>
+    <!-- <scope>source.python</scope> -->
+</snippet>
