@@ -85,7 +85,14 @@ class CompletionListener(sublime_plugin.EventListener):
         definedWord = ''
 
         lastLine = view.substr(view.line(region))
-        lastWord = lastLine.strip();
+        column = view.rowcol(region.a)[1]
+        # print(view.substr(view.word(region.a + 1)))
+        lastWord = lastLine[0:column + 1]
+        lastWord = lastWord.strip()
+        # the thing you're typing may be inbetween other text, for example "if (...) {"
+        lastWordList = re.split('\(|\{| |\:|\;|\+|\-|\*|\/', lastWord)
+        lastWord = lastWordList[-1]
+        lastLetter = lastWord[-1]
 
         if lastLetter == '.':
             # remove dot
