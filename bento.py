@@ -90,7 +90,7 @@ class CompletionListener(sublime_plugin.EventListener):
         lastWord = lastLine[0:column + 1]
         lastWord = lastWord.strip()
         # the thing you're typing may be inbetween other text, for example "if (...) {"
-        lastWordList = re.split('\(|\{| |\:|\;|\+|\-|\*|\/', lastWord)
+        lastWordList = re.split('\[|\(|\{| |\:|\;|\,|\+|\-|\*|\/', lastWord)
         lastWord = lastWordList[-1]
         lastLetter = lastWord[-1]
 
