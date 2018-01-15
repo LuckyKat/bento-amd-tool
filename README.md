@@ -74,5 +74,3 @@ getNumber();
 setNumber(${1:0});
  */
 ```
-
-Quick note: snippets do not have to live 
