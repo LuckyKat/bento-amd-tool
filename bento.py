@@ -145,7 +145,6 @@ def findSnippets(view):
     paths = sublime.Region(brackets[0].a, brackets[0].b)
     paths = view.substr(paths)
     paths = paths.split('\n')
-    print("paths", paths)
     paths.pop();
     del paths[0]
     paths = "".join(paths)
