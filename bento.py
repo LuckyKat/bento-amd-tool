@@ -194,7 +194,7 @@ def inspectFile(path):
         # skip the word snippet itself
         snippetPos += 9
         snippetNamePos = file.find('\n', snippetPos)
-        endPos = file.find(' *', snippetNamePos)
+        endPos = file.find('\n *', snippetNamePos)
 
         snippetName = file[snippetPos: snippetNamePos];
         snippet = file[snippetNamePos: endPos];
