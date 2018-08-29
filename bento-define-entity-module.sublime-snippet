@@ -44,7 +44,7 @@ bento.define('${3}', [
             imageName: '${4}',
             frameCountX: 1,
             frameCountY: 1,
-            originRelative: new Vector2(0, 0),
+            originRelative: new Vector2(0.5, 0.5),
             animations: {
                 default: {
                     speed: 0,
