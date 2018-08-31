@@ -206,6 +206,11 @@ def inspectFile(path):
         # strip whitespaces
         snippetName = snippetName.strip()
         snippet = snippet.strip()
+
+        # if snippet is empty, we can use the snippet name as its body
+        if snippet == "":
+            snippet = snippetName.split("\t")[0]
+        
         snippets.append([snippetName, snippet])
         
         # prepare for searching next snippet

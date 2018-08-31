@@ -43,6 +43,13 @@ Awesome({
 Be careful of writing the snippet trigger and hint, because using certain characters here will break other completions. This is probably a Sublime bug (see this Sublime Text issue https://github.com/SublimeTextIssues/Core/issues/1061)
 The dot `.` and pipe `|` is allowed with the auto_complete_triggers setting, and the tool replaces the pipe.
 
+As a shorthand, if the snippet body is empty, the trigger itself will be used as the snippet. e.g.
+```
+/**
+ * @snippet Awesome.doThing();|snippet
+ */
+```
+
 ### Completions
 
 The tool adds rudimentary completions. A completion is only triggered if the code has a definition somewhere. For example:
