@@ -141,7 +141,7 @@ class CompletionListener(sublime_plugin.EventListener):
 def findSnippets(view):
     # read dependencies and add completions
     global completions
-    brackets = view.find_by_selector('meta.brackets.js')
+    brackets = view.find_by_selector('meta.sequence.js') + view.find_by_selector('meta.brackets.js')
     paths = sublime.Region(brackets[0].a, brackets[0].b)
     paths = view.substr(paths)
     paths = paths.split('\n')
@@ -174,6 +174,8 @@ def findSnippets(view):
             # cache result
             completions[fullPath] = snippets
 
+endOfSnippet = re.compile(r"([\r\n]\s*\*)|(\*/)")
+
 # open file and search for snippet
 def inspectFile(path):
     # read file
@@ -194,7 +196,11 @@ def inspectFile(path):
         # skip the word snippet itself
         snippetPos += 9
         snippetNamePos = file.find('\n', snippetPos)
-        endPos = file.find(' *', snippetNamePos)
+
+        endMatch = endOfSnippet.search(file, snippetNamePos)
+        endPos = -1
+        if endMatch is not None:
+            endPos = endMatch.start()
 
         snippetName = file[snippetPos: snippetNamePos];
         snippet = file[snippetNamePos: endPos];
@@ -274,7 +280,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
             b = file.find('\n', a)
             moduleName = file[a:b]
 
-        regions = view.find_by_selector('meta.function.anonymous.js') + view.find_by_selector('punctuation.definition.brackets.js') + view.find_by_selector('meta.brackets.js')
+        regions = view.find_by_selector('meta.function.declaration.js') + view.find_by_selector('punctuation.definition.brackets.js') + view.find_by_selector('meta.sequence.js') + view.find_by_selector('meta.brackets.js')
 
         modulePath = "\t\'"+modulePath+"\'"
         moduleName = "\t"+moduleName
@@ -381,7 +387,7 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
         word = self.view.substr(self.view.word(self.view.window_to_text([event['x'],event['y']])))
 
         #get index in modules list
-        modules = self.view.substr(self.view.find_by_selector('meta.function.anonymous.js')[0])
+        modules = self.view.substr(self.view.find_by_selector('meta.function.declaration.js')[0])
         modules = modules.split('\n')
         modules.pop()
         del modules[0]
@@ -395,7 +401,7 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
         moduleIndex = modules.index(word)
 
         #find matching path
-        brackets = self.view.find_by_selector('meta.brackets.js')
+        brackets = self.view.find_by_selector('meta.sequence.js') + self.view.find_by_selector('meta.brackets.js')
         paths = sublime.Region(brackets[0].a, brackets[0].b)
         paths = self.view.substr(paths)
         paths = paths.split('\n')
