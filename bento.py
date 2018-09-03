@@ -179,9 +179,11 @@ endOfSnippet = re.compile(r"([\r\n]\s*\*)|(\*/)")
 # open file and search for snippet
 def inspectFile(path):
     # read file
-    # file = open(path, 'r').read()
     with io.open(path, "r", encoding="utf-8") as my_file:
-        file = my_file.read() 
+        try:
+            file = my_file.read() 
+        except:
+            return []
 
     # find the line with @snippet
     isSearching = True
@@ -212,6 +214,11 @@ def inspectFile(path):
         # strip whitespaces
         snippetName = snippetName.strip()
         snippet = snippet.strip()
+
+        # if snippet is empty, we can use the snippet name as its body
+        if snippet == "":
+            snippet = snippetName.split("\t")[0]
+        
         snippets.append([snippetName, snippet])
         
         # prepare for searching next snippet
