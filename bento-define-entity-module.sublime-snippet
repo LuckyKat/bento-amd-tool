@@ -4,7 +4,7 @@
 /**
  * ${1:Module description}
  * @moduleName ${2:ModuleName}
- * @snippet ${2:ModuleName}.snippet
+ * @snippet ${2:ModuleName}|constructor
 ${2:ModuleName}({
     position: new Vector2(0, 0)
 })

@@ -3,7 +3,7 @@
 /**
  * ${1:Component description}
  * @moduleName ${2:ModuleName}
- * @snippet ${2:ModuleName}.snippet
+ * @snippet ${2:ModuleName}|constructor
 ${2:ModuleName}({
     
 })
