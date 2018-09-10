@@ -174,7 +174,13 @@ def findSnippets(view):
             # cache result
             completions[fullPath] = snippets
 
+endOfSnippetName = re.compile(r"([\r\n])|(\*/)")
 endOfSnippet = re.compile(r"([\r\n]\s*\*)|(\*/)")
+
+def getMatchPos(regex, str, startPos):
+    match = regex.search(str, startPos)
+    if match is None: return -1
+    else: return match.start()
 
 # open file and search for snippet
 def inspectFile(path):
@@ -197,12 +203,8 @@ def inspectFile(path):
 
         # skip the word snippet itself
         snippetPos += 9
-        snippetNamePos = file.find('\n', snippetPos)
-
-        endMatch = endOfSnippet.search(file, snippetNamePos)
-        endPos = -1
-        if endMatch is not None:
-            endPos = endMatch.start()
+        snippetNamePos = getMatchPos(endOfSnippetName, file, snippetPos)
+        endPos = getMatchPos(endOfSnippet, file, snippetNamePos)
 
         snippetName = file[snippetPos: snippetNamePos];
         snippet = file[snippetNamePos: endPos];
