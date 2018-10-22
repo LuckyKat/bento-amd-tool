@@ -4,7 +4,7 @@
 /**
  * ${1:Screen description}
  */
-bento.define('${2}', [
+bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
     'bento',
     'bento/math/vector2',
     'bento/math/rectangle',
@@ -35,7 +35,7 @@ bento.define('${2}', [
 ) {
     'use strict';
     var onShow = function (settings) {
-        ${3:/* Screen starts here */}
+        ${2:/* Screen starts here */}
     };
 
     return new Screen({

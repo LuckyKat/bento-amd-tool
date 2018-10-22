@@ -8,7 +8,7 @@ ${2:ModuleName}({
     
 })
  */
-bento.define('${3}', [
+bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
     'bento',
     'bento/math/vector2',
     'bento/math/rectangle',
@@ -30,7 +30,7 @@ bento.define('${3}', [
         var viewport = Bento.getViewport();
         var entity;
         var component = {
-            name: '${4}',
+            name: '${3}',
             start: function (data) {},
             destroy: function (data) {},
             update: function (data) {},
