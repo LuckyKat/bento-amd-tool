@@ -4,7 +4,7 @@
 /**
  * ${1:Module description}
  * @moduleName ${2:ModuleName}
- * @snippet ${2:ModuleName}.snippet
+ * @snippet ${2:ModuleName}|constructor
 ${2:ModuleName}({
     position: new Vector2(0, 0)
 })
@@ -42,9 +42,9 @@ bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
         var position = settings.position;
         var sprite = new Sprite({
             imageName: '${3}',
+            originRelative: new Vector2(0.5, 0.5),
             frameCountX: 1,
             frameCountY: 1,
-            originRelative: new Vector2(0.5, 0.5),
             animations: {
                 default: {
                     speed: 0,

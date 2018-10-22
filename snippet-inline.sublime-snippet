@@ -1,0 +1,9 @@
+<snippet>
+    <content><![CDATA[
+/* @snippet ${1:Snippet}.${2:fn()}|${3:ReturnType} */
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>snippet</tabTrigger>
+    <description>Inline snippet</description>
+    <!-- <scope>source.python</scope> -->
+</snippet>
