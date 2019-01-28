@@ -113,6 +113,8 @@ class CompletionListener(sublime_plugin.EventListener):
 
         if (lastLetter != '.'):
             for key in completions:
+                if (not shouldShowSnippet(key)):
+                    continue
                 snippets = completions[key]
                 for snippet in snippets:
                     # ignore the snippets that start with #
@@ -127,6 +129,8 @@ class CompletionListener(sublime_plugin.EventListener):
             for key in completions:
                 snippets = completions[key]
                 for snippet in snippets:
+                    if (not shouldShowSnippet(key)):
+                        continue
                     leftWord = snippet[0].split('\t')[0]
                     # return the snippets that match exactly left of the .
                     if (leftWord.startswith(lastWord)):
@@ -136,6 +140,26 @@ class CompletionListener(sublime_plugin.EventListener):
                         sn0 = snippet[0].replace('#' + definedWord + '.', '')
                         out.append([sn0, snippet[1]])
         return out
+
+def shouldShowSnippet(path):
+    # only show snippets if it originates from the same project or Bento
+    currentFile = sublime.active_window().active_view().file_name()
+
+    # is it from bento?
+    isBento = path.lower().find('/bento/js')
+    if (isBento >= 0):
+        return True
+
+    # extract path up to /js
+    originIndex = currentFile.find('/js')
+    if (originIndex < 0):
+        # not a bento project?
+        return False
+
+    origin = currentFile[:originIndex]
+
+    # check if path up to /js is similar
+    return path.startswith(origin)
 
 # ready paths and find snippets from files
 def findSnippets(view):
