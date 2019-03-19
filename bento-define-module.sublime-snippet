@@ -1,5 +1,5 @@
 <snippet>
-    <!-- A standard bento define snippet with sprite and entity to fill in -->
+    <!-- A standard bento define snippet -->
     <content><![CDATA[
 /**
  * ${1:Module description}
