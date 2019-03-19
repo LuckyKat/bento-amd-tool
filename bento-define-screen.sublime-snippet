@@ -13,7 +13,6 @@ bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
     'bento/entity',
     'bento/eventsystem',
     'bento/gui/clickbutton',
-    'bento/gui/counter',
     'bento/gui/text',
     'bento/utils',
     'bento/screen',
@@ -27,7 +26,6 @@ bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
     Entity,
     EventSystem,
     ClickButton,
-    Counter,
     Text,
     Utils,
     Screen,
@@ -36,6 +34,7 @@ bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
     'use strict';
     var onShow = function (settings) {
         ${2:/* Screen starts here */}
+        var viewport = Bento.getViewport();
     };
 
     return new Screen({

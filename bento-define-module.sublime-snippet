@@ -1,0 +1,27 @@
+<snippet>
+    <!-- A standard bento define snippet with sprite and entity to fill in -->
+    <content><![CDATA[
+/**
+ * ${1:Module description}
+ * @moduleName ${2:ModuleName}
+ * @snippet ${2:ModuleName}|constructor
+${2:ModuleName}({})
+ */
+bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
+    'bento',
+    'bento/utils'
+], function (
+    Bento,
+    Utils
+) {
+    'use strict';
+    var ${2:ModuleName} = function (settings) {
+        ${3:// module here}
+    };
+    return ${2:ModuleName};
+});
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>bento</tabTrigger>
+    <description>Bento Module</description>
+</snippet>

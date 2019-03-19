@@ -10,26 +10,15 @@ ${2:ModuleName}({
  */
 bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
     'bento',
-    'bento/math/vector2',
-    'bento/math/rectangle',
-    'bento/entity',
-    'bento/eventsystem',
     'bento/utils',
-    'bento/tween'
 ], function (
     Bento,
-    Vector2,
-    Rectangle,
-    Entity,
-    EventSystem,
-    Utils,
-    Tween
+    Utils
 ) {
     'use strict';
     return function (settings) {
-        var viewport = Bento.getViewport();
         var entity;
-        var component = {
+        var component = new Object({
             name: '${3}',
             start: function (data) {},
             destroy: function (data) {},
@@ -38,7 +27,7 @@ bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
             attached: function (data) {
                 entity = data.entity;
             }
-        };
+        });
         return component;
     };
 });

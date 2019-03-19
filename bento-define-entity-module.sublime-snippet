@@ -14,12 +14,8 @@ bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
     'bento/math/vector2',
     'bento/math/rectangle',
     'bento/components/sprite',
-    'bento/components/clickable',
     'bento/entity',
     'bento/eventsystem',
-    'bento/gui/clickbutton',
-    'bento/gui/counter',
-    'bento/gui/text',
     'bento/utils',
     'bento/tween'
 ], function (
@@ -27,18 +23,13 @@ bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
     Vector2,
     Rectangle,
     Sprite,
-    Clickable,
     Entity,
     EventSystem,
-    ClickButton,
-    Counter,
-    Text,
     Utils,
     Tween
 ) {
     'use strict';
     return function (settings) {
-        var viewport = Bento.getViewport();
         var position = settings.position;
         var sprite = new Sprite({
             imageName: '${3}',
@@ -52,19 +43,18 @@ bento.define('${TM_FILEPATH/^(.+\/js\/)(.+)(\.js)/$2/}', [
                 }
             }
         });
-        var behavior = {
+        var behavior = new Object({
             name: '${4:behavior}',
             start: function (data) {},
             destroy: function (data) {},
             update: function (data) {},
             draw: function (data) {}
-        };
+        });
         var entity = new Entity({
             z: 0,
             name: '${5}',
             family: [''],
             position: position,
-            updateWhenPaused: 0,
             float: false,
             components: [
                 sprite,
