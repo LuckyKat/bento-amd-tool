@@ -170,7 +170,8 @@ def findSnippets(view):
     paths = view.substr(paths)
     paths = paths.split('\n')
     paths.pop();
-    del paths[0]
+    if len(paths) > 0:
+        del paths[0]
     paths = "".join(paths)
     paths = re.sub('[\'\t\s]','',paths).split(',')
 
@@ -208,6 +209,8 @@ def getMatchPos(regex, str, startPos):
 
 # open file and search for snippet
 def inspectFile(path):
+    if not path.endswith(".js"):
+        return []
     # read file
     with io.open(path, "r", encoding="utf-8") as my_file:
         try:
@@ -360,7 +363,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
             path = os.path.join(folder, "js")
             if os.path.isdir(path):
                 #unsure wether this will work on windows too
-                root = folder.split('/').pop()
+                root = folder.split(os.path.sep).pop()
                 if (current.count(folder) == 0 and root != 'Bento'):
                     continue
 
