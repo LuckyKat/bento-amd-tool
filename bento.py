@@ -151,7 +151,7 @@ def shouldShowSnippet(path):
         return True
 
     # extract path up to /js
-    originIndex = currentFile.find('/js')
+    originIndex = currentFile.find(os.path.sep + 'js')
     if (originIndex < 0):
         # not a bento project?
         return False
