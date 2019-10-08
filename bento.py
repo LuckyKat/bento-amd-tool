@@ -94,6 +94,22 @@ class CompletionListener(sublime_plugin.EventListener):
         lastWord = lastWordList[-1]
         lastLetter = lastWord[-1]
 
+        def addSnippet(snippet):
+            # add snippet to the completions list
+            dotsInLastWord = lastWord.count('.') + lastLetter.count('.')
+            dotsInSnippet = snippet[1].count('.')
+
+            if dotsInSnippet <= 1 or dotsInLastWord == 0 or dotsInSnippet == dotsInLastWord:
+                # in these cases, ST will correctly replace the whole word
+                out.append(snippet)
+            else:
+                # otherwise ST will only replace whatever comes after the last dot
+                # so we have to trim the front of the snippet accordingly
+                lastDotPos = len(lastWord)
+                if lastLetter != '.':
+                    lastDotPos = lastWord.rfind('.')
+                out.append([snippet[0], snippet[1][lastDotPos+1:]])
+
         if lastLetter == '.':
             # remove dot
             lastWord = lastWord[:-1]
@@ -123,7 +139,7 @@ class CompletionListener(sublime_plugin.EventListener):
                         continue
                     # the word typed so far must be an exact match so far
                     if lastWord.startswith(leftWord[0:len(lastWord)]):
-                        out.append(snippet)
+                        addSnippet(snippet)
         else:
             # dot completion
             for key in completions:
@@ -134,7 +150,7 @@ class CompletionListener(sublime_plugin.EventListener):
                     leftWord = snippet[0].split('\t')[0]
                     # return the snippets that match exactly left of the .
                     if leftWord.startswith(lastWord):
-                        out.append(snippet)
+                        addSnippet(snippet)
                     # match objects
                     if definedWord != '' and leftWord.startswith('#' + definedWord):
                         sn0 = snippet[0].replace('#' + definedWord + '.', '')
