@@ -35,7 +35,7 @@ def getFullPath(path):
     #find root folders
     for folder in sublime.active_window().folders():
         p = os.path.join(folder, "js")
-        if (folder.split(os.sep)[-1].lower() == "bento"):
+        if folder.split(os.sep)[-1].lower() == "bento":
             bentoFolder = os.path.join(folder, "js")
         if os.path.isdir(p):
             if(currentFile.count(p) != 0):
@@ -48,21 +48,21 @@ def getFullPath(path):
 
 
     fullPath = ''
-    if (path.split('/')[0] == 'bento'):
+    if path.split('/')[0] == 'bento':
         fullPath = bentoFolder
         path = re.sub('bento/','',path)
     else:
         fullPath = currentFolder
 
-    if (path == 'bento'):
+    if path == 'bento':
         fullPath += '/bento.js'
     else:
         fullPath += '/'+path+'.js'
     
-    if (os.path.isfile(fullPath) == False):
+    if not os.path.isfile(fullPath):
         # file doesn't exist, try js/modules
         fullPath = fullPath.replace('js/' ,'js/modules/')
-        if (os.path.isfile(fullPath)):
+        if os.path.isfile(fullPath):
             return fullPath
         else:
             return ''
@@ -72,14 +72,14 @@ def getFullPath(path):
 # event listener when st presents completions
 class CompletionListener(sublime_plugin.EventListener):
     def on_query_completions(self, view, prefix, locations):
-        syntax = view.settings().get('syntax');
-        if (not "JavaScript" in syntax):
+        syntax = view.settings().get('syntax')
+        if "JavaScript" not in syntax:
             return None
         out = []
 
         # get last letter
-        region = view.sel()[0];
-        region.a = region.a - 1;
+        region = view.sel()[0]
+        region.a = region.a - 1
         lastLetter = view.substr(region)
         lastWord = ''
         definedWord = ''
@@ -101,7 +101,7 @@ class CompletionListener(sublime_plugin.EventListener):
             # try to find the definition of this
             body = view.substr(sublime.Region(0, view.size()))
             definition = lastWord + ' = new '
-            defIndex = body.find(definition);
+            defIndex = body.find(definition)
             if defIndex >= 0:
                 # get the constructor word
                 defLine = view.substr(view.line(defIndex))
@@ -111,32 +111,32 @@ class CompletionListener(sublime_plugin.EventListener):
             # find the string after the last whitespace
             lastWord = lastWord.rsplit(' ', 1)[-1]
 
-        if (lastLetter != '.'):
+        if lastLetter != '.':
             for key in completions:
-                if (not shouldShowSnippet(key)):
+                if not shouldShowSnippet(key):
                     continue
                 snippets = completions[key]
                 for snippet in snippets:
                     # ignore the snippets that start with #
                     leftWord = snippet[0]
-                    if (leftWord.startswith('#')):
+                    if leftWord.startswith('#'):
                         continue
                     # the word typed so far must be an exact match so far
-                    if (lastWord.startswith(leftWord[0:len(lastWord)])):
+                    if lastWord.startswith(leftWord[0:len(lastWord)]):
                         out.append(snippet)
         else:
             # dot completion
             for key in completions:
                 snippets = completions[key]
                 for snippet in snippets:
-                    if (not shouldShowSnippet(key)):
+                    if not shouldShowSnippet(key):
                         continue
                     leftWord = snippet[0].split('\t')[0]
                     # return the snippets that match exactly left of the .
-                    if (leftWord.startswith(lastWord)):
+                    if leftWord.startswith(lastWord):
                         out.append(snippet)
                     # match objects
-                    if (definedWord != '' and leftWord.startswith('#' + definedWord)):
+                    if definedWord != '' and leftWord.startswith('#' + definedWord):
                         sn0 = snippet[0].replace('#' + definedWord + '.', '')
                         out.append([sn0, snippet[1]])
         return out
@@ -147,12 +147,12 @@ def shouldShowSnippet(path):
 
     # is it from bento?
     isBento = path.lower().find('/bento/js')
-    if (isBento >= 0):
+    if isBento >= 0:
         return True
 
     # extract path up to /js
     originIndex = currentFile.find(os.path.sep + 'js')
-    if (originIndex < 0):
+    if originIndex < 0:
         # not a bento project?
         return False
 
@@ -169,7 +169,7 @@ def findSnippets(view):
     paths = sublime.Region(brackets[0].a, brackets[0].b)
     paths = view.substr(paths)
     paths = paths.split('\n')
-    paths.pop();
+    paths.pop()
     if len(paths) > 0:
         del paths[0]
     paths = "".join(paths)
@@ -179,7 +179,7 @@ def findSnippets(view):
     fileNames = []
     for sheet in sheets:
         fileName = sheet.view().file_name()
-        if (not fileName):
+        if not fileName:
             continue
         fileNames.append(os.path.abspath(fileName))
 
@@ -190,9 +190,9 @@ def findSnippets(view):
 
         # already cached?
         # unless the tab is open
-        if (fullPath in completions and fullPath not in fileNames):
+        if fullPath in completions and fullPath not in fileNames:
             continue
-        if (fullPath):
+        if fullPath:
             # open file and inspect
             # even if the file has no snippet, we cache the result so it doesnt have to be opened again
             snippets = inspectFile(fullPath)
@@ -224,7 +224,7 @@ def inspectFile(path):
     snippets = []
     while True:
         snippetPos = file.find('@snippet', searchPos)
-        if (snippetPos < 0):
+        if snippetPos < 0:
             # no snippets found
             break
 
@@ -233,8 +233,8 @@ def inspectFile(path):
         snippetNamePos = getMatchPos(endOfSnippetName, file, snippetPos)
         endPos = getMatchPos(endOfSnippet, file, snippetNamePos)
 
-        snippetName = file[snippetPos: snippetNamePos];
-        snippet = file[snippetNamePos: endPos];
+        snippetName = file[snippetPos: snippetNamePos]
+        snippet = file[snippetNamePos: endPos]
 
         # replace dots with tabs
         # Bug in sublime???
@@ -258,21 +258,21 @@ def inspectFile(path):
 # event listener when st opens a file
 class OpenListener(sublime_plugin.EventListener):
     def on_load_async(self, view):
-        syntax = view.settings().get('syntax');
-        if (not "JavaScript" in syntax):
+        syntax = view.settings().get('syntax')
+        if "JavaScript" not in syntax:
             return None
         findSnippets(view)
         return 
     def on_activated_async(self, view):
-        syntax = view.settings().get('syntax');
-        if (not "JavaScript" in syntax):
+        syntax = view.settings().get('syntax')
+        if "JavaScript" not in syntax:
             return None
         findSnippets(view)
         return 
     # update own snippet on saving
     def on_post_save_async(self, view):
-        syntax = view.settings().get('syntax');
-        if (not "JavaScript" in syntax):
+        syntax = view.settings().get('syntax')
+        if "JavaScript" not in syntax:
             return None
         fullPath = os.path.abspath(view.file_name())
         snippets = inspectFile(fullPath)
@@ -285,8 +285,8 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
 
     def on_done(self, index):
         view = sublime.active_window().active_view()
-        syntax = view.settings().get('syntax');
-        if (not "JavaScript" in syntax):
+        syntax = view.settings().get('syntax')
+        if "JavaScript" not in syntax:
             return None
 
         if index == -1:
@@ -306,7 +306,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
 
         #Try to find actual alias defined in file
         a = file.find('@moduleName ')
-        if (a != -1):
+        if a != -1:
             a += 12
             b = file.find('\n', a)
             moduleName = file[a:b]
@@ -319,22 +319,22 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
         pathPos = -1
         namePos = -1
 
-        arrayStart = -1;
+        arrayStart = -1
 
         for region in regions:
             char = view.substr(region)[-1]
-            if (char == '['):
+            if char == '[':
                 arrayStart = region.a
-            if (char == ']' and pathPos == -1):
+            if char == ']' and pathPos == -1:
                 l = region.b - arrayStart
                 #TODO this isn't exactly foolproof
-                if (l > 10):
+                if l > 10:
                     modulePath = ",\n"+modulePath
                 pathPos = region.b - 2
 
-            if (char == ')' and namePos == -1):
+            if char == ')' and namePos == -1:
                 #TODO this isn't exactly foolproof
-                if (region.b - region.a > 17):
+                if region.b - region.a > 17:
                     moduleName = ",\n"+moduleName
                 namePos = region.b - 2
 
@@ -350,7 +350,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
         window = sublime.active_window()
         view = self.view
         # get folders in folder pane
-        folders = window.folders();
+        folders = window.folders()
         # prepare to collect names and paths
         self.names = []
         self.files = []
@@ -364,7 +364,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
             if os.path.isdir(path):
                 #unsure wether this will work on windows too
                 root = folder.split(os.path.sep).pop()
-                if (current.count(folder) == 0 and root != 'Bento'):
+                if current.count(folder) == 0 and root != 'Bento':
                     continue
 
                 for (dirpath, dirnames, filenames) in walk(path):
@@ -380,8 +380,8 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
 
                         name = name[:-3] #cut off .js
 
-                        if (root == 'Bento'):
-                            name = 'bento/'+name;
+                        if root == 'Bento':
+                            name = 'bento/'+name
 
 
                         f.append(filepath)
@@ -425,7 +425,7 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
         modules = "".join(modules)
         modules = re.sub('[\t\s]', '', modules).split(',')
 
-        if (modules.count(word) == 0):
+        if modules.count(word) == 0:
             print('not a module')
             return
 
@@ -436,7 +436,7 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
         paths = sublime.Region(brackets[0].a, brackets[0].b)
         paths = self.view.substr(paths)
         paths = paths.split('\n')
-        paths.pop();
+        paths.pop()
         del paths[0]
         paths = "".join(paths)
         paths = re.sub('[\'\t\s]','',paths).split(',')
@@ -450,7 +450,7 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
         #find root folders
         for folder in sublime.active_window().folders():
             p = os.path.join(folder, "js")
-            if (folder.split(os.sep)[-1].lower() == "bento"):
+            if folder.split(os.sep)[-1].lower() == "bento":
                 bentoFolder = os.path.join(folder, "js")
             if os.path.isdir(p):
                 if(currentFile.count(p) != 0):
@@ -463,18 +463,18 @@ class BentoDefinitionCommand(sublime_plugin.TextCommand):
 
 
         fullPath = ''
-        if (path.split('/')[0] == 'bento'):
+        if path.split('/')[0] == 'bento':
             fullPath = bentoFolder
             path = re.sub('bento/','',path)
         else:
             fullPath = currentFolder
 
-        if (path == 'bento'):
+        if path == 'bento':
             fullPath += '/bento.js'
         else:
             fullPath += '/'+path+'.js'
         
-        if (os.path.isfile(fullPath) == False):
+        if not os.path.isfile(fullPath):
             # file doesn't exist, try js/modules
             fullPath = fullPath.replace('js/' ,'js/modules/')
             sublime.active_window().open_file(fullPath)
