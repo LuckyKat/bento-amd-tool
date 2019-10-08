@@ -161,11 +161,11 @@ def shouldShowSnippet(path):
     # check if path up to /js is similar
     return path.startswith(origin)
 
-# ready paths and find snippets from files
-def findSnippets(view):
-    # read dependencies and add completions
-    global completions
+# get the paths of all required modules in the given view
+def getRequirePaths(view):
     brackets = view.find_by_selector('meta.sequence.js') + view.find_by_selector('meta.brackets.js')
+    if len(brackets) == 0:
+        return []
     paths = sublime.Region(brackets[0].a, brackets[0].b)
     paths = view.substr(paths)
     paths = paths.split('\n')
@@ -174,6 +174,14 @@ def findSnippets(view):
         del paths[0]
     paths = "".join(paths)
     paths = re.sub('[\'\t\s]','',paths).split(',')
+    return paths
+
+# ready paths and find snippets from files
+def findSnippets(view):
+    # read dependencies and add completions
+    global completions
+
+    paths = getRequirePaths(view)
 
     sheets = sublime.active_window().sheets()
     fileNames = []
@@ -291,8 +299,9 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
 
         if index == -1:
             return
-        print(self.files[index])
-        # file = open(self.files[index], 'r').read()
+
+        print("Adding module:", self.files[index])
+
         with io.open(self.files[index], "r", encoding="utf-8") as my_file:
             file = my_file.read() 
 
@@ -300,6 +309,10 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
         b = file.find('\'',a)
 
         modulePath = file[a:b]
+
+        if modulePath in getRequirePaths(view):
+            print("Module is already added!")
+            return
 
         moduleName = self.names[index].split('/').pop()
         moduleName = moduleName.capitalize()
@@ -311,7 +324,10 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
             b = file.find('\n', a)
             moduleName = file[a:b]
 
-        regions = view.find_by_selector('meta.function.declaration.js') + view.find_by_selector('punctuation.definition.brackets.js') + view.find_by_selector('meta.sequence.js') + view.find_by_selector('meta.brackets.js')
+        regions = view.find_by_selector('meta.function.declaration.js') \
+                + view.find_by_selector('punctuation.definition.brackets.js') \
+                + view.find_by_selector('meta.sequence.js') \
+                + view.find_by_selector('meta.brackets.js')
 
         modulePath = "\t\'"+modulePath+"\'"
         moduleName = "\t"+moduleName
@@ -364,7 +380,7 @@ class BentoAmdCommand(sublime_plugin.TextCommand):
             if os.path.isdir(path):
                 #unsure wether this will work on windows too
                 root = folder.split(os.path.sep).pop()
-                if current.count(folder) == 0 and root != 'Bento':
+                if current is not None and current.count(folder) == 0 and root != 'Bento':
                     continue
 
                 for (dirpath, dirnames, filenames) in walk(path):
