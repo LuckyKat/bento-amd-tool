@@ -264,6 +264,14 @@ def inspectFile(path):
         # Bug in sublime???
         snippetName = snippetName.replace("|", "\t")
 
+        # un-indent the whole snippet
+        leadingWhitespace = snippet[:len(snippet)-len(snippet.lstrip())].strip("\r\n")
+        lines = snippet.splitlines(True)
+        for i, s in enumerate(lines):
+            if s.startswith(leadingWhitespace):
+                lines[i] = s[len(leadingWhitespace):]
+        snippet = "".join(lines)
+
         # strip whitespaces
         snippetName = snippetName.strip()
         snippet = snippet.strip()
