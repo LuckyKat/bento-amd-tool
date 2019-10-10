@@ -101,9 +101,10 @@ class CompletionListener(sublime_plugin.EventListener):
         # the thing you're typing may be inbetween other text, for example "if (...) {"
         lastWord = specialCharsExceptDots.split(lastWord)[-1]
         lastLetter = lastWord[-1]
+        lastWordWithDot = lastWord
 
         def addSnippet(snippet):
-            if not snippet[1].startswith(lastWord):
+            if not snippet[1].startswith(lastWordWithDot):
                 # the body of the snippet differs from what we typed so far
                 # so we don't want any correction for this snippet
                 out.append(snippet)
@@ -118,9 +119,7 @@ class CompletionListener(sublime_plugin.EventListener):
             else:
                 # otherwise ST will only replace whatever comes after the last dot
                 # so we have to trim the front of the snippet accordingly
-                lastDotPos = len(lastWord)
-                if lastLetter != '.':
-                    lastDotPos = lastWord.rfind('.')
+                lastDotPos = lastWordWithDot.rfind('.')
                 out.append([snippet[0], snippet[1][lastDotPos+1:]])
 
         if lastLetter == '.':
