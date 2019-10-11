@@ -69,7 +69,16 @@ def getFullPath(path):
     else:
         return fullPath
 
-# event listener when st presents completions
+specialChars = re.compile(r"\W")
+specialCharsExceptDots = re.compile(r"[^\w\.]")
+
+def countMatches(reg, s):
+    n = 0
+    for match in reg.finditer(s):
+        n += 1
+    return n
+
+# event listener when ST presents completions
 class CompletionListener(sublime_plugin.EventListener):
     def on_query_completions(self, view, prefix, locations):
         syntax = view.settings().get('syntax')
@@ -90,24 +99,27 @@ class CompletionListener(sublime_plugin.EventListener):
         lastWord = lastLine[0:column + 1]
         lastWord = lastWord.strip()
         # the thing you're typing may be inbetween other text, for example "if (...) {"
-        lastWordList = re.split('\[|\(|\{| |\:|\;|\,|\+|\-|\*|\/', lastWord)
-        lastWord = lastWordList[-1]
+        lastWord = specialCharsExceptDots.split(lastWord)[-1]
         lastLetter = lastWord[-1]
+        lastWordWithDot = lastWord
 
         def addSnippet(snippet):
-            # add snippet to the completions list
-            dotsInLastWord = lastWord.count('.') + lastLetter.count('.')
-            dotsInSnippet = snippet[1].count('.')
+            if not snippet[1].startswith(lastWordWithDot):
+                # the body of the snippet differs from what we typed so far
+                # so we don't want any correction for this snippet
+                out.append(snippet)
+                return
 
-            if dotsInSnippet <= 1 or dotsInLastWord == 0 or dotsInSnippet == dotsInLastWord:
-                # in these cases, ST will correctly replace the whole word
+            specialCharsInLastWord = countMatches(specialChars, lastWord) + lastLetter.count('.')
+            specialCharsInSnippetName = countMatches(specialChars, snippet[0].split('\t')[0])
+
+            if specialCharsInSnippetName == specialCharsInLastWord:
+                # in this case ST will correctly replace the whole word
                 out.append(snippet)
             else:
                 # otherwise ST will only replace whatever comes after the last dot
                 # so we have to trim the front of the snippet accordingly
-                lastDotPos = len(lastWord)
-                if lastLetter != '.':
-                    lastDotPos = lastWord.rfind('.')
+                lastDotPos = lastWordWithDot.rfind('.')
                 out.append([snippet[0], snippet[1][lastDotPos+1:]])
 
         if lastLetter == '.':
